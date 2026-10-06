@@ -8,8 +8,8 @@
 | **1** | Fundação | ✅ CONCLUÍDA |
 | **2** | Jobs | ✅ CONCLUÍDA |
 | **3** | Candidates & Resumes | ✅ CONCLUÍDA |
-| **4** | AI Screening | ⏳ PRÓXIMA ETAPA |
-| **5** | Tests | ⏳ NÃO INICIADA |
+| **4** | AI Screening | ✅ CONCLUÍDA |
+| **5** | Tests | ⏳ PRÓXIMA ETAPA |
 | **6** | Ranking | ⏳ NÃO INICIADA |
 | **7** | Interviews | ⏳ NÃO INICIADA |
 | **8** | Dashboard | ⏳ NÃO INICIADA |
@@ -92,7 +92,20 @@
 ---
 
 ## Etapa 4 — AI Screening
-**Status:** ⏳ NÃO INICIADA
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06  
+
+### Entregas
+- [x] Contrato e Abstração de IA (`IAIRecruitmentEvaluator`, `AiEvaluationInput`, `AiEvaluationResult`)
+- [x] Implementação do Serviço OpenAI (`OpenAiEvaluatorService`) com suporte a `OPENAI_MODEL` (`gpt-4o-mini`), JSON estrito, cálculo ponderado de notas e fallback gracioso/offline para desenvolvimento local
+- [x] Prompt de Triagem Versionado (`resume-screening.v1.ts`, versão `1.0.0`) com regras éticas e de não-discriminação
+- [x] Interface de Repositório (`IScreeningRepository`) e Repositório Prisma (`PrismaScreeningRepository`)
+- [x] DTO (`EvaluateResumeDto`) com validações `class-validator` UUID e Swagger
+- [x] Use Cases (`EvaluateResumeUseCase`, `GetEvaluationUseCase`, `ListJobEvaluationsUseCase`, `ListCandidateEvaluationsUseCase`)
+- [x] Atualização automática do status do candidato para `SCREENING_APPROVED` caso a recomendação da IA seja `APPROVED`
+- [x] Controlador REST (`ScreeningController`) mapeado para `/api/v1/screening` e endpoints de listagem por vaga e candidato
+- [x] Testes unitários para Serviço OpenAI, Use Cases e Controller (`33` testes unitários totais no backend)
+- [x] Suíte de testes E2E para API de triagem por IA (`screening.e2e-spec.ts`, `23` testes E2E totais no backend)
 
 ---
 
