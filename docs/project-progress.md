@@ -7,8 +7,8 @@
 | **0** | Análise e Planejamento | ✅ CONCLUÍDA |
 | **1** | Fundação | ✅ CONCLUÍDA |
 | **2** | Jobs | ✅ CONCLUÍDA |
-| **3** | Candidates & Resumes | ⏳ PRÓXIMA ETAPA |
-| **4** | AI Screening | ⏳ NÃO INICIADA |
+| **3** | Candidates & Resumes | ✅ CONCLUÍDA |
+| **4** | AI Screening | ⏳ PRÓXIMA ETAPA |
 | **5** | Tests | ⏳ NÃO INICIADA |
 | **6** | Ranking | ⏳ NÃO INICIADA |
 | **7** | Interviews | ⏳ NÃO INICIADA |
@@ -73,7 +73,21 @@
 ---
 
 ## Etapa 3 — Candidates & Resumes
-**Status:** ⏳ NÃO INICIADA
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06  
+
+### Entregas
+- [x] Interfaces de Repositório (`ICandidatesRepository`, `IResumesRepository`)
+- [x] Serviço de extração de texto PDF/TXT (`PdfTextExtractorService` utilizando `pdf-parse`)
+- [x] DTOs com validação `class-validator` e Swagger (`CreateCandidateDto`, `UpdateCandidateDto`, `ListCandidatesQueryDto`, `UploadResumeDto`)
+- [x] Validação de unicidade de e-mail (RN-02)
+- [x] Use Cases do Candidato (`CreateCandidateUseCase`, `GetCandidateUseCase`, `ListCandidatesUseCase`, `UpdateCandidateUseCase`, `DeleteCandidateUseCase`)
+- [x] Use Cases do Currículo (`UploadResumeUseCase`, `GetResumeUseCase`, `ListCandidateResumesUseCase`)
+- [x] Atualização automática do status do candidato para `SCREENING` ao enviar currículo e desativação de currículos anteriores da mesma vaga
+- [x] Repositórios Prisma (`PrismaCandidatesRepository`, `PrismaResumesRepository`)
+- [x] Controladores REST (`CandidatesController`, `ResumesController`)
+- [x] Testes unitários para Use Cases e Controllers de Candidatos e Currículos
+- [x] Suíte de testes E2E com 9 cenários da API (`candidates-resumes.e2e-spec.ts`)
 
 ---
 
