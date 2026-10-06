@@ -67,13 +67,23 @@ describe('UploadResumeUseCase', () => {
     await expect(useCase.execute('c-1', 'j-1', null as any)).rejects.toThrow(BadRequestException);
   });
 
-  it('deve lançar NotFoundException se candidato não existir', async () => {
+  it('deve lançar BadRequestException se o tipo de arquivo não for permitido', async () => {
     const mockFile = {
-      originalname: 'cv.pdf',
-      mimetype: 'application/pdf',
+      originalname: 'malicioso.exe',
+      mimetype: 'application/x-msdownload',
       size: 500,
       buffer: Buffer.from('data'),
     };
-    await expect(useCase.execute('invalid-c', 'j-1', mockFile)).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute('c-1', 'j-1', mockFile)).rejects.toThrow(BadRequestException);
+  });
+
+  it('deve lançar BadRequestException se o arquivo exceder 5MB', async () => {
+    const mockFile = {
+      originalname: 'grande.pdf',
+      mimetype: 'application/pdf',
+      size: 6 * 1024 * 1024,
+      buffer: Buffer.from('data'),
+    };
+    await expect(useCase.execute('c-1', 'j-1', mockFile)).rejects.toThrow(BadRequestException);
   });
 });

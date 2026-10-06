@@ -65,6 +65,12 @@ export class EvaluateResumeUseCase {
       );
     }
 
+    // Limita o tamanho do texto enviado à IA (máximo de 20.000 caracteres) para prevenir estouro de contexto e DoS
+    const sanitizedResumeText =
+      targetResume.extractedText.length > 20000
+        ? targetResume.extractedText.slice(0, 20000) + '\n\n[...Texto truncado por limite de tamanho...]'
+        : targetResume.extractedText;
+
     const aiResult = await this.aiEvaluator.evaluate({
       candidateId: candidate.id,
       jobId: job.id,
@@ -80,7 +86,7 @@ export class EvaluateResumeUseCase {
       experienceWeight: job.experienceWeight,
       technologyWeight: job.technologyWeight,
       behavioralWeight: job.behavioralWeight,
-      resumeText: targetResume.extractedText,
+      resumeText: sanitizedResumeText,
     });
 
     const evaluation = await this.screeningRepository.create({

@@ -36,8 +36,8 @@ export class JobsController {
 
   @Post()
   @ApiOperation({ summary: 'Criar uma nova vaga seletiva' })
-  @ApiResponse({ status: 210, description: 'Vaga criada com sucesso' })
-  @ApiResponse({ status: 400, description: 'Dados de entrada invlidos ou pesos no somam 100%' })
+  @ApiResponse({ status: 201, description: 'Vaga criada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Dados de entrada inválidos ou pesos não somam 100%' })
   async create(@Body() dto: CreateJobDto) {
     return this.createJobUseCase.execute(dto);
   }

@@ -47,6 +47,25 @@ export class UploadResumeUseCase {
       throw new BadRequestException('Arquivo de currículo não foi fornecido.');
     }
 
+    // Validação de tipos de arquivo suportados (apenas PDF e TXT)
+    const allowedMimeTypes = ['application/pdf', 'text/plain'];
+    const allowedExtensions = ['.pdf', '.txt'];
+    const fileExt = file.originalname ? file.originalname.slice(file.originalname.lastIndexOf('.')).toLowerCase() : '';
+
+    if (!allowedMimeTypes.includes(file.mimetype) || !allowedExtensions.includes(fileExt)) {
+      throw new BadRequestException(
+        'Tipo de arquivo não permitido. Apenas arquivos PDF e TXT (.pdf, .txt) são aceitos.',
+      );
+    }
+
+    // Validação de tamanho máximo (5 MB por padrão)
+    const maxSizeBytes = 5 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      throw new BadRequestException(
+        `O arquivo excede o limite máximo permitido de 5 MB. Tamanho recebido: ${(file.size / (1024 * 1024)).toFixed(2)} MB.`,
+      );
+    }
+
     const candidate = await this.candidatesRepository.findById(candidateId);
     if (!candidate) {
       throw new NotFoundException(`Candidato com ID '${candidateId}' não foi encontrado.`);

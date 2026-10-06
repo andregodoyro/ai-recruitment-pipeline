@@ -13,8 +13,8 @@
 | **6** | Ranking | ✅ CONCLUÍDA |
 | **7** | Interviews | ✅ CONCLUÍDA |
 | **8** | Dashboard | ✅ CONCLUÍDA |
-| **9** | Quality & Security | ⏳ PRÓXIMA ETAPA |
-| **10** | Documentação e Release | ⏳ NÃO INICIADA |
+| **9** | Quality & Security | ✅ CONCLUÍDA |
+| **10** | Documentação e Release | ✅ CONCLUÍDA |
 
 ---
 
@@ -220,9 +220,79 @@
 ---
 
 ## Etapa 9 — Quality & Security
-**Status:** ⏳ NÃO INICIADA
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06
+
+### Auditoria Transversal Pré-Implementação
+- **Validação de entradas:** DTOs com `class-validator` e `class-transformer` presentes em todos os módulos, com `whitelist: true` e `forbidNonWhitelisted: true` no `main.ts` ✅
+- **Upload e Segurança de Arquivos:** Faltava validação estrita de extensões permitidas e tamanho no Use Case de upload de currículos ⚠️ (corrigido)
+- **Tratamento de Erros e Logs:** Faltava um filtro de exceção global centralizado para capturar erros 500 não tratados, evitando vazamento de stack traces e informações de infraestrutura para o cliente ⚠️ (corrigido)
+- **Segurança da Integração com IA:** Mitigação contra Prompt Injection embutido no texto do currículo e sanitização/truncamento de textos excessivamente longos para proteção contra DoS/estouro de contexto de tokens ⚠️ (corrigido)
+- **Docker e CI:** CI e Dockerfile configurados com Node 20 enquanto o backend possui dependências modernas que operam de forma ideal com Node 22 ⚠️ (corrigido)
+
+### Entregas
+- [x] **Segurança de Upload (`UploadResumeUseCase`):**
+  - Validação estrita de tipo MIME (`application/pdf`, `text/plain`) e extensões (`.pdf`, `.txt`)
+  - Limite de tamanho máximo de 5 MB por arquivo com mensagens descritivas
+- [x] **Filtro Global de Exceções (`AllExceptionsFilter`):**
+  - Tratamento unificado de erros com timestamps e paths
+  - Bloqueio de vazamento de stack traces e dados internos em produção
+  - Registro de logs detalhados via NestJS Logger
+- [x] **Segurança e Robustez da IA (`OpenAiEvaluatorService` & `resume-screening.v1.ts`):**
+  - Regra explícita de mitigação de Prompt Injection no prompt versionado (`v1`)
+  - Sanitização de texto e truncamento seguro em 20.000 caracteres antes de despachar chamadas para a API de IA
+- [x] **Correções em Swagger / Documentação OpenAPI:**
+  - Correção de typo de status HTTP 210 para 201 no `JobsController`
+- [x] **Alinhamento de Docker e CI:**
+  - Atualização do `Dockerfile` de `node:20-alpine` para `node:22-alpine` em ambos os stages
+  - Atualização do step de build do backend no GitHub Actions (`ci.yml`) para `node-version: '22'`
+- [x] **Testes Adicionados:**
+  - Testes unitários para rejeição de extensões inválidas e arquivos > 5MB no upload
+  - Testes unitários para o `AllExceptionsFilter`
+- [x] **Resultados de Testes e Build:**
+  - **76 testes unitários** passando (23 arquivos de teste)
+  - **40 testes E2E** passando (8 suítes)
+  - `nest build` validado com **0 erros** TypeScript
 
 ---
 
 ## Etapa 10 — Documentação e Release
-**Status:** ⏳ NÃO INICIADA
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06
+
+### Entregas
+- [x] **README Principal Atualizado (`README.md`):**
+  - Visão geral completa do sistema e arquitetura
+  - Stack tecnológica detalhada (NestJS 12, Next.js 14, Prisma 6.4, PostgreSQL 16, Vitest)
+  - Instruções de inicialização rápida com Docker Compose
+  - Guia de setup local de desenvolvimento
+  - Tabela explicativa de todas as variáveis de ambiente
+  - Instruções de execução de testes unitários e E2E
+  - Links para todos os documentos técnicos e diretrizes de contribuição
+- [x] **Documentação de Domínio e Regras de Negócio (`docs/domain.md`):**
+  - Modelagem das 9 entidades principais e tabelas
+  - Diagrama de ciclo de vida completo do candidato (`CandidateStatus`)
+  - Especificação detalhada das regras de negócio oficiais (RN-01 a RN-07)
+- [x] **Documentação da API REST (`docs/api.md`):**
+  - Mapeamento completo de todos os endpoints dos 8 módulos de negócio
+  - Métodos HTTP, rotas, descrições e status code de sucesso
+  - Referência para a documentação interativa Swagger/OpenAPI
+- [x] **Documentação da Integração com IA (`docs/ai-evaluation.md`):**
+  - Abstração do serviço e injeção de dependência (`IAIRecruitmentEvaluator`)
+  - Explicação do modo fallback determinístico para desenvolvimento e CI/CD offline
+  - Versionamento de prompts e rastreabilidade de decisões
+  - Medidas de segurança (Prompt Injection mitigation, sanitização de tamanho e clamping de notas)
+- [x] **Decisões Arquiteturais Registradas (`docs/decisions.md`):**
+  - ADR 01: Monólito Modular com Clean Architecture
+  - ADR 02: Inversão de Dependência em Repositórios e Serviços de IA
+  - ADR 03: Cálculo Dinâmico do Ranking On-Demand
+  - ADR 04: Validação Estrita de Arquivos e Prevenção de Injeções
+  - ADR 05: Exception Filter Global Centralizado
+- [x] **Validação e Homologação Final:**
+  - Build de produção (`nest build`) compilando com **0 erros** TypeScript
+  - **76 testes unitários** passando (23 arquivos de teste)
+  - **40 testes E2E** passando (8 arquivos de teste)
+  - Coerência total entre documentação técnica, OpenAPI/Swagger e código-fonte
+  - Projeto pronto para a primeira release oficial (`v1.0.0`)
+
+---

@@ -3,10 +3,15 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
+import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug'],
   });
+
+  // Global exception filter for secure error handling and logging
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Global prefix
   app.setGlobalPrefix('api');
