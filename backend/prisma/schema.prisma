@@ -1,0 +1,321 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+enum CandidateStatus {
+  NEW
+  SCREENING
+  SCREENING_APPROVED
+  TEST
+  TEST_APPROVED
+  INTERVIEW
+  HIRED
+  REJECTED
+}
+
+enum Recommendation {
+  APPROVED
+  REJECTED
+  REVIEW
+}
+
+enum TestStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  OPEN_TEXT
+}
+
+enum CandidateTestStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+// =============================================================================
+// JOB
+// =============================================================================
+
+model Job {
+  id              String          @id @default(uuid())
+  title           String
+  description     String
+  requirements    String
+  desiredSkills   String[]
+  experienceLevel ExperienceLevel
+  status          JobStatus       @default(OPEN)
+
+  // Critérios de avaliação (pesos somam 100)
+  educationWeight   Float @default(15)
+  automationWeight  Float @default(20)
+  dataWeight        Float @default(20)
+  experienceWeight  Float @default(20)
+  technologyWeight  Float @default(15)
+  behavioralWeight  Float @default(10)
+
+  // Pesos do ranking (somam 100)
+  rankingResumeWeight Float @default(60)
+  rankingTestWeight   Float @default(40)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relacionamentos
+  resumes      Resume[]
+  evaluations  Evaluation[]
+  tests        Test[]
+  interviews   Interview[]
+
+  @@map("jobs")
+}
+
+// =============================================================================
+// CANDIDATE
+// =============================================================================
+
+model Candidate {
+  id     String          @id @default(uuid())
+  name   String
+  email  String          @unique
+  phone  String?
+  status CandidateStatus @default(NEW)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relacionamentos
+  resumes        Resume[]
+  evaluations    Evaluation[]
+  candidateTests CandidateTest[]
+  interviews     Interview[]
+
+  @@map("candidates")
+}
+
+// =============================================================================
+// RESUME
+// =============================================================================
+
+model Resume {
+  id            String  @id @default(uuid())
+  candidateId   String
+  jobId         String
+  fileName      String
+  fileUrl       String
+  mimeType      String
+  fileSizeBytes Int
+  extractedText String? @db.Text
+  isActive      Boolean @default(true)
+
+  uploadedAt DateTime @default(now())
+
+  // Relacionamentos
+  candidate   Candidate    @relation(fields: [candidateId], references: [id])
+  job         Job          @relation(fields: [jobId], references: [id])
+  evaluations Evaluation[]
+
+  @@index([candidateId])
+  @@index([jobId])
+  @@map("resumes")
+}
+
+// =============================================================================
+// EVALUATION (resultado da triagem por IA)
+// =============================================================================
+
+model Evaluation {
+  id          String @id @default(uuid())
+  candidateId String
+  jobId       String
+  resumeId    String
+
+  // Scores por critério (0-10)
+  educationScore   Float
+  automationScore  Float
+  dataScore        Float
+  experienceScore  Float
+  technologyScore  Float
+  behavioralScore  Float
+
+  // Score final calculado (ponderado pelos pesos da vaga)
+  finalScore Float
+
+  // Resultado qualitativo
+  strengths      String[]
+  gaps           String[]
+  justification  String    @db.Text
+  recommendation Recommendation
+
+  // Rastreabilidade da IA
+  promptVersion  String
+  aiModel        String
+  rawAiResponse  String  @db.Text
+
+  createdAt DateTime @default(now())
+
+  // Relacionamentos
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+  job       Job       @relation(fields: [jobId], references: [id])
+  resume    Resume    @relation(fields: [resumeId], references: [id])
+
+  @@index([jobId])
+  @@index([candidateId])
+  @@index([finalScore(sort: Desc)])
+  @@map("evaluations")
+}
+
+// =============================================================================
+// TEST
+// =============================================================================
+
+model Test {
+  id          String     @id @default(uuid())
+  jobId       String
+  title       String
+  description String?
+  status      TestStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  job            Job             @relation(fields: [jobId], references: [id])
+  questions      Question[]
+  candidateTests CandidateTest[]
+
+  @@index([jobId])
+  @@map("tests")
+}
+
+// =============================================================================
+// QUESTION
+// =============================================================================
+
+model Question {
+  id           String       @id @default(uuid())
+  testId       String
+  questionText String
+  type         QuestionType
+  options      String[]     // JSON array (null para OPEN_TEXT)
+  correctAnswer String?     // null para OPEN_TEXT
+  weight        Float       @default(1)
+  order         Int         @default(0)
+
+  // Relacionamentos
+  test    Test              @relation(fields: [testId], references: [id], onDelete: Cascade)
+  answers CandidateAnswer[]
+
+  @@index([testId])
+  @@map("questions")
+}
+
+// =============================================================================
+// CANDIDATE TEST
+// =============================================================================
+
+model CandidateTest {
+  id          String              @id @default(uuid())
+  candidateId String
+  testId      String
+  score       Float?
+  status      CandidateTestStatus @default(PENDING)
+
+  submittedAt DateTime?
+  gradedAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  // Relacionamentos
+  candidate Candidate         @relation(fields: [candidateId], references: [id])
+  test      Test              @relation(fields: [testId], references: [id])
+  answers   CandidateAnswer[]
+
+  @@unique([candidateId, testId])
+  @@index([candidateId])
+  @@index([testId])
+  @@map("candidate_tests")
+}
+
+// =============================================================================
+// CANDIDATE ANSWER
+// =============================================================================
+
+model CandidateAnswer {
+  id              String  @id @default(uuid())
+  candidateTestId String
+  questionId      String
+  answerText      String?
+  isCorrect       Boolean?
+
+  // Relacionamentos
+  candidateTest CandidateTest @relation(fields: [candidateTestId], references: [id], onDelete: Cascade)
+  question      Question      @relation(fields: [questionId], references: [id])
+
+  @@unique([candidateTestId, questionId])
+  @@map("candidate_answers")
+}
+
+// =============================================================================
+// INTERVIEW
+// =============================================================================
+
+model Interview {
+  id          String          @id @default(uuid())
+  candidateId String
+  jobId       String
+  scheduledAt DateTime
+  meetingUrl  String?
+  status      InterviewStatus @default(SCHEDULED)
+  notes       String?         @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+  job       Job       @relation(fields: [jobId], references: [id])
+
+  @@index([jobId])
+  @@index([candidateId])
+  @@index([scheduledAt])
+  @@map("interviews")
+}
