@@ -5,8 +5,8 @@
 | Etapa | Nome | Status |
 |---|---|---|
 | **0** | Análise e Planejamento | ✅ CONCLUÍDA |
-| **1** | Fundação | 🔄 EM ANDAMENTO |
-| **2** | Jobs | ⏳ NÃO INICIADA |
+| **1** | Fundação | ✅ CONCLUÍDA |
+| **2** | Jobs | ⏳ PRÓXIMA ETAPA |
 | **3** | Candidates & Resumes | ⏳ NÃO INICIADA |
 | **4** | AI Screening | ⏳ NÃO INICIADA |
 | **5** | Tests | ⏳ NÃO INICIADA |
@@ -39,20 +39,20 @@
 ---
 
 ## Etapa 1 — Fundação
-**Status:** 🔄 EM ANDAMENTO  
-**Data início:** 2026-10-06
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06  
 
 ### Checklist
-- [ ] Arquivos raiz (README, .gitignore, .env.example, docker-compose.yml)
-- [ ] Projeto NestJS scaffolded
-- [ ] Dependências do backend instaladas (Prisma, OpenAI, etc.)
-- [ ] Schema Prisma completo
-- [ ] Estrutura de módulos do backend
-- [ ] Health check endpoint
-- [ ] Projeto Next.js scaffolded
-- [ ] GitHub Actions CI
-- [ ] Dockerfiles
-- [ ] Documentação inicial (docs/)
+- [x] Arquivos raiz (README, .gitignore, .env.example, docker-compose.yml)
+- [x] Projeto NestJS scaffolded
+- [x] Dependências do backend instaladas (Prisma 6.4.0, OpenAI, Vitest, NestJS Swagger)
+- [x] Schema Prisma completo
+- [x] Estrutura de módulos do backend
+- [x] Health check endpoint (`/health`)
+- [x] Projeto Next.js 16 scaffolded
+- [x] GitHub Actions CI
+- [x] Dockerfiles (backend e frontend)
+- [x] Documentação inicial (docs/)
 
 ---
 
