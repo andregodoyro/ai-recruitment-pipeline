@@ -6,8 +6,8 @@
 |---|---|---|
 | **0** | Análise e Planejamento | ✅ CONCLUÍDA |
 | **1** | Fundação | ✅ CONCLUÍDA |
-| **2** | Jobs | ⏳ PRÓXIMA ETAPA |
-| **3** | Candidates & Resumes | ⏳ NÃO INICIADA |
+| **2** | Jobs | ✅ CONCLUÍDA |
+| **3** | Candidates & Resumes | ⏳ PRÓXIMA ETAPA |
 | **4** | AI Screening | ⏳ NÃO INICIADA |
 | **5** | Tests | ⏳ NÃO INICIADA |
 | **6** | Ranking | ⏳ NÃO INICIADA |
@@ -57,7 +57,18 @@
 ---
 
 ## Etapa 2 — Jobs
-**Status:** ⏳ NÃO INICIADA
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06  
+
+### Entregas
+- [x] Interface de Repositório (`IJobsRepository`)
+- [x] DTOs com validações `class-validator` e Swagger (`CreateJobDto`, `UpdateJobDto`, `UpdateJobStatusDto`, `ListJobsQueryDto`)
+- [x] Validação de regra de negócio RN-01 (soma dos pesos de avaliação = 100%, soma dos pesos de ranking = 100%)
+- [x] Use Cases (`CreateJobUseCase`, `GetJobUseCase`, `ListJobsUseCase`, `UpdateJobUseCase`, `UpdateJobStatusUseCase`, `DeleteJobUseCase`)
+- [x] Repositório Prisma (`PrismaJobsRepository`) com suporte a paginação e soft delete
+- [x] Controlador REST (`JobsController`) mapeado para `/api/v1/jobs`
+- [x] Testes unitários dos Use Cases e Controller
+- [x] Suíte de testes E2E para todos os 8 cenários da API de vagas (`jobs.e2e-spec.ts`)
 
 ---
 
