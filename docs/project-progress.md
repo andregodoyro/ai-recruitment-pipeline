@@ -9,11 +9,11 @@
 | **2** | Jobs | ✅ CONCLUÍDA |
 | **3** | Candidates & Resumes | ✅ CONCLUÍDA |
 | **4** | AI Screening | ✅ CONCLUÍDA |
-| **5** | Tests | ⏳ PRÓXIMA ETAPA |
-| **6** | Ranking | ⏳ NÃO INICIADA |
-| **7** | Interviews | ⏳ NÃO INICIADA |
-| **8** | Dashboard | ⏳ NÃO INICIADA |
-| **9** | Quality & Security | ⏳ NÃO INICIADA |
+| **5** | Tests | ✅ CONCLUÍDA |
+| **6** | Ranking | ✅ CONCLUÍDA |
+| **7** | Interviews | ✅ CONCLUÍDA |
+| **8** | Dashboard | ✅ CONCLUÍDA |
+| **9** | Quality & Security | ⏳ PRÓXIMA ETAPA |
 | **10** | Documentação e Release | ⏳ NÃO INICIADA |
 
 ---
@@ -110,22 +110,112 @@
 ---
 
 ## Etapa 5 — Tests
-**Status:** ⏳ NÃO INICIADA
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06  
+
+### Entregas
+- [x] Interfaces de Repositório (`ITestsRepository`, `IQuestionsRepository`, `ICandidateTestsRepository`)
+- [x] DTOs com validações `class-validator` e Swagger (`CreateTestDto`, `UpdateTestDto`, `UpdateTestStatusDto`, `CreateQuestionDto`, `UpdateQuestionDto`, `SubmitAnswersDto`, `ListTestsQueryDto`)
+- [x] Regras de negócio implementadas (RN-03: apenas testes com status `PUBLISHED` podem ser atribuídos; correção automática para `MULTIPLE_CHOICE` e `TRUE_FALSE`; cálculo ponderado de score; transição automática do candidato para `TEST_APPROVED` quando score ≥ 7.0)
+- [x] Use Cases de Testes (`CreateTestUseCase`, `GetTestUseCase`, `ListTestsUseCase`, `UpdateTestUseCase`, `UpdateTestStatusUseCase`, `DeleteTestUseCase`)
+- [x] Use Cases de Questões (`CreateQuestionUseCase`, `ListQuestionsUseCase`, `UpdateQuestionUseCase`, `DeleteQuestionUseCase`)
+- [x] Use Cases de Aplicação e Correção (`AssignTestUseCase`, `SubmitAnswersUseCase`, `GetCandidateTestUseCase`)
+- [x] Repositórios Prisma (`PrismaTestsRepository`, `PrismaQuestionsRepository`, `PrismaCandidateTestsRepository`)
+- [x] Controladores REST (`TestsController`, `CandidateTestsController`) mapeando endpoints em `/api/v1/tests`, `/api/v1/questions`, `/api/v1/candidate-tests`
+- [x] Testes unitários para Use Cases e Controllers (totalizando **55** testes unitários no backend)
+- [x] Suíte de testes E2E para o ciclo completo de testes (`tests.e2e-spec.ts`, totalizando **29** testes E2E no backend)
+- [x] Build do NestJS (`nest build`) validado com sucesso sem erros TypeScript
 
 ---
 
 ## Etapa 6 — Ranking
-**Status:** ⏳ NÃO INICIADA
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06
+
+### Auditoria Pré-Etapa 6
+- `Evaluation.finalScore` (resumeScore) e `CandidateTest.score` (testScore) disponíveis e consistentes no schema ✅
+- `Job.rankingResumeWeight` e `Job.rankingTestWeight` presentes, configuráveis por vaga e já validados na Etapa 2 para soma = 100 ✅
+- `IScreeningRepository` e `ICandidateTestsRepository` exportam métodos de consulta por vaga ✅
+- Nenhuma inconsistência ou pendência encontrada nas Etapas 1–5 ✅
+
+### Entregas
+- [x] Interface de Domínio (`IRankingRepository`, `RankingEntry`) em `ranking.repository.interface.ts`
+- [x] `PrismaRankingRepository` — consultas read-only a `Evaluation` e `CandidateTest` (via relação `test.jobId`)
+- [x] `GetJobRankingUseCase` — ranking completo da vaga com fórmula `finalScore = resumeScore × (rankingResumeWeight/100) + testScore × (rankingTestWeight/100)`. Candidatos sem teste têm apenas `resumeScore` considerado. Candidatos com mesmo score recebem a mesma posição (tie handling).
+- [x] `GetCandidateRankingPositionUseCase` — posição individual de um candidato dentro do ranking de uma vaga
+- [x] `RankingController` expondo `GET /api/v1/jobs/:jobId/ranking` e `GET /api/v1/jobs/:jobId/ranking/:candidateId`
+- [x] `RankingModule` com wiring completo (imports JobsModule, CandidatesModule, DatabaseModule)
+- [x] Testes unitários para `GetJobRankingUseCase` (4 casos: fórmula 60/40, empate, testScore nulo, dados de saída) e `RankingController` (2 casos)
+- [x] Suíte E2E `ranking.e2e-spec.ts` (3 testes: ranking completo, posição individual, 404 para vaga inexistente)
+- [x] Build do NestJS (`nest build`) validado com sucesso — 0 erros TypeScript
+- [x] **61 testes unitários** (18 suítes) e **32 testes E2E** (6 suítes) — todos passando
 
 ---
 
 ## Etapa 7 — Interviews
-**Status:** ⏳ NÃO INICIADA
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06
+
+### Auditoria Pré-Etapa 7
+- Modelo `Interview` e enum `InterviewStatus` (`SCHEDULED`, `CONFIRMED`, `COMPLETED`, `CANCELLED`, `RESCHEDULED`) já consolidados no schema Prisma ✅
+- Enum `CandidateStatus.TEST_APPROVED` e `CandidateStatus.INTERVIEW` disponíveis ✅
+- Regra de transição e trava de negócio verificada: apenas candidatos em `TEST_APPROVED` (ou já em `INTERVIEW`) podem receber agendamento de entrevistas em vagas abertas ✅
+
+### Entregas
+- [x] Contrato de repositório de domínio (`IInterviewsRepository`) e token `INTERVIEWS_REPOSITORY`
+- [x] DTOs com validações `class-validator` e Swagger (`CreateInterviewDto`, `UpdateInterviewDto`, `ListInterviewsQueryDto`)
+- [x] Regras de negócio implementadas nos Use Cases:
+  - Vaga deve existir e estar com status `OPEN`
+  - Candidato deve existir e possuir status `TEST_APPROVED` (ou `INTERVIEW`)
+  - Atualização automática do status do candidato para `INTERVIEW` após criação
+  - Validação de data/hora ISO-8601 e URLs de reunião válidas
+- [x] Use Cases implementados:
+  - `CreateInterviewUseCase`
+  - `GetInterviewUseCase`
+  - `ListInterviewsUseCase`
+  - `UpdateInterviewUseCase`
+  - `DeleteInterviewUseCase`
+- [x] `PrismaInterviewsRepository` implementado com suporte a paginação e filtros
+- [x] `InterviewsController` mapeando rotas REST:
+  - `POST /api/v1/interviews`
+  - `GET /api/v1/interviews`
+  - `GET /api/v1/interviews/:id`
+  - `GET /api/v1/jobs/:jobId/interviews`
+  - `GET /api/v1/candidates/:candidateId/interviews`
+  - `PATCH /api/v1/interviews/:id`
+  - `DELETE /api/v1/interviews/:id`
+- [x] Módulo `InterviewsModule` conectado e exportando use cases e repositório
+- [x] Testes unitários para `CreateInterviewUseCase` e `InterviewsController` (totalizando **69** testes unitários no backend)
+- [x] Suíte de testes E2E (`interviews.e2e-spec.ts`, totalizando **37** testes E2E no backend)
+- [x] Build do NestJS (`nest build`) validado com sucesso sem erros TypeScript
 
 ---
 
 ## Etapa 8 — Dashboard
-**Status:** ⏳ NÃO INICIADA
+**Status:** ✅ CONCLUÍDA  
+**Data fim:** 2026-10-06
+
+### Auditoria Pré-Etapa 8
+- Mapeamento das fontes de dados: `Job`, `Candidate`, `Resume`, `Evaluation`, `CandidateTest`, `Interview` existentes e integradas via relacionamentos Prisma ✅
+- Métricas e agregações necessárias (contagens, distribuição de scores e agrupamentos por status) plenamente suportadas pelo modelo relacional ✅
+- Parâmetros de filtro (`jobId`, `startDate`, `endDate`) definidos e validados ✅
+
+### Entregas
+- [x] Contrato de repositório de domínio (`IDashboardRepository`) e token `DASHBOARD_REPOSITORY`
+- [x] Tipagem de dados para o Dashboard (`DashboardMetrics`, `CandidateFunnelStage`, `ScoreDistribution`, `TopCandidateEntry`, `DashboardOverview`)
+- [x] DTO com validação Swagger (`DashboardFilterDto`)
+- [x] Use Case `GetDashboardOverviewUseCase` com validação de existência de vaga caso o filtro seja informado
+- [x] `PrismaDashboardRepository` agregando:
+  - **Métricas Gerais:** Total de vagas, vagas abertas, total de candidatos, currículos, avaliações, testes técnicos, entrevistas e taxa de conversão para contratação
+  - **Funil de Candidatos:** Distribuição de candidatos em cada etapa do fluxo seletivo (`NEW`, `SCREENING`, `SCREENING_APPROVED`, `TEST`, `TEST_APPROVED`, `INTERVIEW`, `HIRED`, `REJECTED`) e percentual do total
+  - **Distribuição de Scores:** Histograma em faixas de pontuação (`0-2`, `2-4`, `4-6`, `6-8`, `8-10`) para currículos e testes
+  - **Top Candidatos / Ranking:** Lista ordenada dos 10 melhores candidatos calculando o score final ponderado pelos pesos específicos da vaga
+  - **Filtros Dinâmicos:** Suporte para filtros por vaga (`jobId`) e intervalo de datas (`startDate` e `endDate`)
+- [x] Controller REST `DashboardController` expondo `GET /api/v1/dashboard/overview`
+- [x] Módulo `DashboardModule` registrado e integrado
+- [x] Testes unitários para `GetDashboardOverviewUseCase` e `DashboardController` (totalizando **73** testes unitários no backend)
+- [x] Suíte de testes E2E (`dashboard.e2e-spec.ts`, totalizando **40** testes E2E no backend)
+- [x] Build do NestJS (`nest build`) validado com sucesso sem erros TypeScript
 
 ---
 
