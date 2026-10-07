@@ -13,8 +13,6 @@ async function bootstrap() {
   // Global exception filter for secure error handling and logging
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // Global prefix
-  app.setGlobalPrefix('api');
 
   // CORS
   app.enableCors({
@@ -57,7 +55,7 @@ async function bootstrap() {
 
   const port = process.env.BACKEND_PORT ?? 3001;
   await app.listen(port);
-  console.log(`🚀 API running on: http://localhost:${port}/api`);
+  console.log(`🚀 API running on: http://localhost:${port}/api/v1`);
   console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
 }
 
